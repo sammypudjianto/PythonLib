@@ -33,7 +33,7 @@ def regula_falsi(func, min_guess, max_guess, err_tolerance):
     """
     y_min = func(min_guess)
     y_max = func(max_guess)
-    x_new = (y_max - y_min)/(max_guess - min_guess)
+    x_new = (0.5 * y_max * min_guess - y_min * max_guess)/(0.5 * y_max - y_min)
     y_new = func(x_new)
     if abs(y_new) <= err_tolerance:
         return x_new
@@ -68,6 +68,12 @@ def secant(func, min_guess, max_guess, err_tolerance, max_try=10000):
 
 
 def newton_rhapson(func, min_guess, max_guess, err_tolerance):
+    x = sympy.symbols('x')
+    derivatives = sympy.derivatives(func, x)
+    pass
+
+
+def dekker():
     pass
 
 
@@ -87,11 +93,11 @@ def f(x):
 # root = bisection(f, -5, 5, 0.001)
 # print('root for bisection is: ', root)
 
-# root = regula_falsi(f, -5, 5, 0.0001)
-# print('root for regula falsi is: ', root)
+root = regula_falsi(f, -5, 5, 0.0001)
+print('root for regula falsi is: ', root)
 
-root = secant(f, -5, -4.9, 0.0001)
-print('root for secant is: ', root)
+# root = secant(f, -2, 0, 0.0001)
+# print('root for secant is: ', root)
 
 al = j(f)
 print(al(root))
