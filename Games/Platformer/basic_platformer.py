@@ -1,7 +1,16 @@
+from enum import Enum
+
 import pygame as p
 from asset_loader import AssetLoader
 
-WIN_WIDTH = WIN_HEIGHT = 500
+WIN_WIDTH = 500
+WIN_HEIGHT = 480
+
+
+class Action(Enum):
+    STANDING = 0
+    WALK_LEFT = 1
+    WALK_RIGHT = 2
 
 
 class GameState():
@@ -21,11 +30,43 @@ def render(win, x, y, width, height):
     p.display.update()
 
 
+def redraw_game_window(win, walkcount, action, animation, bg):
+    # setup the background
+    win.blit(bg, (0, 0))
+
+    if walkcount + 1 >= 27:
+        walkcount = 0
+
+    if action == Action.WALK_LEFT:
+        win.blit(animation[walkcount//3], (x, y))
+        walkcount += 1
+
+    elif action == Action.WALK_RIGHT:
+        win.blit(animation[walkcount//3], (x, y))
+        walkcount += 1
+
+    else:
+        win.blit(animation[0], (x, y))
+
+    p.display.update()
+
+
 if __name__ == '__main__':
     p.init()
 
     win = p.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     p.display.set_caption("First Platformer Game")
+
+    loader = AssetLoader()
+    walk_right = loader.load_walk_right_sprites()
+    walk_left = loader.load_walk_left_sprites()
+    bg = loader.load_background()
+    char = loader.load_character()
+    animation = {
+        'walk_right': walk_right,
+        'walk_left': walk_left,
+        'character': char
+        }
 
     x = 50
     y = 420
@@ -40,26 +81,33 @@ if __name__ == '__main__':
 
     left = False
     right = False
-    walkCount = 0
+    walkcount = 0
 
     walk_right = []
     while run:
         p.time.delay(50)
+
         for event in p.event.get():
             if event.type == p.QUIT:
                 run = False
+
         keys = p.key.get_pressed()
+        anim = animation['character']
+
         if keys[p.K_LEFT] and x > velocity:
             x -= velocity
+            anim = animation['walk_left']
+            action = Action.WALK_LEFT
         elif keys[p.K_RIGHT] and x < (WIN_WIDTH - velocity - width):
             x += velocity
+            anim = animation['walk_right']
+            action = Action.WALK_RIGHT
+        else:
+            anim = animation['character']
+            action = Action.STANDING
+
         if not(is_jump):
-            if keys[p.K_UP] and y > velocity:
-                y -= velocity
-            elif keys[p.K_DOWN] and y < (WIN_HEIGHT - velocity - height):
-                y += velocity
-            elif keys[p.K_SPACE]:
-                is_jump = True
+            is_jump = keys[p.K_SPACE]
         else:
             if jump_count >= -10:
                 y -= (jump_count * abs(jump_count)) * 0.5
@@ -67,4 +115,5 @@ if __name__ == '__main__':
             else:
                 is_jump = False
                 jump_count = jump_max_count
-        render(win, x, y, width, height)
+
+        redraw_game_window(win, walkcount, action, anim, bg)

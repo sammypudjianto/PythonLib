@@ -24,7 +24,7 @@ class AssetLoader():
             if name_filter != '':
                 if (
                     ext == ext_filter and
-                    name[len(name_filter) - 1] == name_filter
+                    name.startswith(name_filter)
                     ):
                     player_sprites.append(p.image.load(file_relpath))
             elif ext == ext_filter:
@@ -38,9 +38,7 @@ class AssetLoader():
         return self.__load_sprites('.png', 'R')
 
     def load_background(self):
-        return self.__load_sprites('.png', 'bg')
+        return self.__load_sprites('.jpg', 'bg').pop()
 
-
-l = AssetLoader()
-x = l.load_walk_left_sprites()
-print(x)
+    def load_character(self):
+        return self.__load_sprites('.png', 'standing')
