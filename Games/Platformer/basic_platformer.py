@@ -1,119 +1,70 @@
-from enum import Enum
-
 import pygame as p
 from asset_loader import AssetLoader
-
-WIN_WIDTH = 500
-WIN_HEIGHT = 480
-
-
-class Action(Enum):
-    STANDING = 0
-    WALK_LEFT = 1
-    WALK_RIGHT = 2
+from enemy import Enemy
+from player import Player
 
 
 class GameState():
+
+    WIN_WIDTH = 500
+    WIN_HEIGHT = 480
+
     def __init__(self):
-        self.asset_loader = AssetLoader()
+        p.init()
+        p.display.set_caption("First Platformer Game")
+        self.win = p.display.set_mode((self.WIN_WIDTH, self.WIN_HEIGHT))
+
+        self.player = Player()
+        self.enemy = Enemy()
+        asset_loader = AssetLoader()
+        self.bg = asset_loader.load_background()
+        self.music = asset_loader.load_music()
+        self.music.play(-1)
+
+        self.score = 0
+        self.clock = p.time.Clock()
 
     def update(self):
-        pass
+        run = True
+        while run:
+            self.win.blit(self.bg, (0, 0))
+            self.clock.tick(60)
 
-    def render(self):
-        pass
+            for event in p.event.get():
+                if event.type == p.QUIT:
+                    run = False
 
+            self.player.update(self.win)
+            self.enemy.update(self.win)
+            self._check_collision()
+            self._display_score()
+            p.display.update()
 
-def render(win, x, y, width, height):
-    win.fill((0, 0, 0))
-    p.draw.rect(win, (255, 0, 0), (x, y, width, height))
-    p.display.update()
+    def _check_collision(self):
+        """
+        1. check collision between enemy vs player
+        2. check collision between enemy vs player bullets
+        """
+        enemy_collided = self.player.hitbox.collide(self.enemy.hitbox)
+        if enemy_collided:
+            self.player.health -= 1
+            print('player vs enemy hit')  # reduce health of the player
 
+        bullets = self.player.bullets
+        for bullet in bullets:
+            bullet_hit = bullet.hitbox.collide(self.enemy.hitbox)
+            if bullet_hit:
+                bullets.remove(bullet)
+                self.score += 1
+                self.enemy.health -= 1
+                print('bullet hit vs enemy')
 
-def redraw_game_window(win, walkcount, action, animation, bg):
-    # setup the background
-    win.blit(bg, (0, 0))
-
-    if walkcount + 1 >= 27:
-        walkcount = 0
-
-    if action == Action.WALK_LEFT:
-        win.blit(animation[walkcount//3], (x, y))
-        walkcount += 1
-
-    elif action == Action.WALK_RIGHT:
-        win.blit(animation[walkcount//3], (x, y))
-        walkcount += 1
-
-    else:
-        win.blit(animation[0], (x, y))
-
-    p.display.update()
+    def _display_score(self):
+        font = p.font.SysFont('comicsans', 30, True)
+        text = font.render('Score: ' + str(self.score), 1, (0, 0, 0))
+        self.win.blit(text, (390, 10))
 
 
 if __name__ == '__main__':
-    p.init()
-
-    win = p.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-    p.display.set_caption("First Platformer Game")
-
-    loader = AssetLoader()
-    walk_right = loader.load_walk_right_sprites()
-    walk_left = loader.load_walk_left_sprites()
-    bg = loader.load_background()
-    char = loader.load_character()
-    animation = {
-        'walk_right': walk_right,
-        'walk_left': walk_left,
-        'character': char
-        }
-
-    x = 50
-    y = 420
-    width = 40
-    height = 50
-    velocity = 5
-
-    run = True
-    is_jump = False
-    jump_max_count = 10
-    jump_count = jump_max_count
-
-    left = False
-    right = False
-    walkcount = 0
-
-    walk_right = []
-    while run:
-        p.time.delay(50)
-
-        for event in p.event.get():
-            if event.type == p.QUIT:
-                run = False
-
-        keys = p.key.get_pressed()
-        anim = animation['character']
-
-        if keys[p.K_LEFT] and x > velocity:
-            x -= velocity
-            anim = animation['walk_left']
-            action = Action.WALK_LEFT
-        elif keys[p.K_RIGHT] and x < (WIN_WIDTH - velocity - width):
-            x += velocity
-            anim = animation['walk_right']
-            action = Action.WALK_RIGHT
-        else:
-            anim = animation['character']
-            action = Action.STANDING
-
-        if not(is_jump):
-            is_jump = keys[p.K_SPACE]
-        else:
-            if jump_count >= -10:
-                y -= (jump_count * abs(jump_count)) * 0.5
-                jump_count -= 1
-            else:
-                is_jump = False
-                jump_count = jump_max_count
-
-        redraw_game_window(win, walkcount, action, anim, bg)
+    game = GameState()
+    game.update()
