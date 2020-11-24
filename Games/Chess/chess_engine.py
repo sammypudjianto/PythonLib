@@ -1,50 +1,52 @@
 import pygame as p
-
-WIDTH = HEIGHT = 512
-DIMENSION = 8
-SQ_SIZE = HEIGHT/DIMENSION
-MAX_FPS = 8
+from chess_board import ChessBoard
+from chess_pieces import ChessPieces
 
 
-def load_images():
-    """
-    load images from the images folder
-    """
-    images = []
-    pieces = ["bB", "bK"]
-    for piece in pieces:
-        images[piece] = p.image.load("Images/" + piece + ".png")
+class GameState():
+    WIDTH = 800
+    HEIGHT = 600
+    DIMENSION = 8
+    SQ_SIZE = HEIGHT/DIMENSION
+    MAX_FPS = 8
 
+    def __init__(self):
+        p.init()
 
-def main():
-    p.init()
-    screen = p.display.set_mode((WIDTH, HEIGHT))
-    clock = p.time.Clock()
-    screen.fill(p.Color('white'))
-    # gs = chess_engine.GameState()
-    load_images()
-    running = True
-    while running:
-        for e in p.event.get():
-            if e.type == p.QUIT:
-                running = False
+        self.win = p.display.set_mode((self.WIDTH, self.HEIGHT))
+        p.display.set_caption("A Game of Chess")
+        self.win.fill(p.Color('brown'))
+        self.__initialise_board()
+        self.__initialise_pieces()
+        self.clock = p.time.Clock()
 
-        clock.tick(MAX_FPS)
-        p.display.flip()
+    def __initialise_board(self):
+        # initialise tiles
+        self.board = ChessBoard()
+        self.board.setup_tiles(self.win)
 
+    def __initialise_pieces(self):
+        # initialise pieces
+        self.pieces = ChessPieces()
+        for wpiece in self.pieces.white_pieces:
+            wpiece.draw(self.win, self.board.tiles)
 
-def draw_game_state(screen, gs):
-    draw_board(screen)
-    draw_pieces(screen, gs.board)
+        for bpiece in self.pieces.black_pieces:
+            bpiece.draw(self.win, self.board.tiles)
 
+    def update(self):
+        run = True
+        self.clock.tick(self.MAX_FPS)
+        while run:
+            for e in p.event.get():
+                if e.type == p.QUIT:
+                    run = False
 
-def draw_board(screen):
-    pass
-
-
-def draw_pieces(screen, board):
-    pass
+            # render
+            p.display.flip()    # what is this?
+            p.display.update()
 
 
 if __name__ == '__main__':
-    main()
+    game_of_chess = GameState()
+    game_of_chess.update()
