@@ -1,7 +1,7 @@
 
 class SimpleFlyWeight():
     """
-    principle: predefined the values and reuse it time to time
+    principle: predefined the values and reuse it for time to time
     """
     def __init__(self):
         self.grades = [letter + suffix for letter in 'ABCD' for suffix in ('+', '', '-')] + ['F']
