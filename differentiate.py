@@ -13,6 +13,10 @@ def y():
     return f
 
 
+def add(x, y):
+    return x + y
+
+
 xn = 3
 x = symbols('x')
 y = y()

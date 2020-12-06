@@ -1,3 +1,4 @@
+import numba
 import numpy as np
 
 
@@ -10,11 +11,12 @@ def proof_of_pi(no_of_sims):
     """
     sum = 0
     for i in range(no_of_sims):
-        x = np.random.random()
-        y = np.random.random()
+        x = np.random.uniform()
+        y = np.random.uniform()
         if ((x ** 2) + (y ** 2)) <= 1:
             sum += 1/no_of_sims
     return sum * 4
+    # return 4 * sum([(np.random.uniform() ** 2 + np.random.uniform() ** 2 <= 1) for _ in range(no_of_sims)]) / no_of_sims
 
 
 def proof_of_euler(big_number):
@@ -25,8 +27,10 @@ def proof_of_euler(big_number):
 
 
 if __name__ == '__main__':
-    no_paths = 1000000
-    print('numerical pi:', proof_of_pi(no_paths))
-    print('real pi:', 22/7)
+    no_paths = 100000
+    delegate_proof_of_pi = numba.jit(proof_of_pi)
+
+    print('numerical pi:', delegate_proof_of_pi(no_paths))
+    print('real pi:', np.pi)
     print('numerical euler:', proof_of_euler(no_paths))
     print('euler', np.exp(1))
