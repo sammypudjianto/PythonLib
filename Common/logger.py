@@ -18,11 +18,11 @@ class Logger():
         return self.func(*args, **kwargs)
 
 
-# @Logger
-# def add(x, y):
-#     return x + y
+@Logger
+def add(x, y):
+    return x + y
 
 
-# if __name__ == '__main__':
-#     x = add(5, 2)
-#     print(x)
+if __name__ == '__main__':
+    x = add(5, 2)
+    print(x)
